@@ -1,7 +1,6 @@
 'use client'
 import { useState, useEffect } from 'react';
 import { ethers } from 'ethers';
-// 🔔 Şık bildirimler için gerekli kütüphaneler
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import abi from '../constants/abi.json';
@@ -20,7 +19,6 @@ export default function Home() {
 
   const redNumbers = [1, 3, 5, 7, 9, 12, 14, 16, 18, 19, 21, 23, 25, 27, 30, 32, 34, 36];
 
-  // 🕒 Canlı Fiyat ve Zamanlayıcı
   useEffect(() => {
     const fetchLivePrice = async () => {
       try {
@@ -60,7 +58,6 @@ export default function Home() {
     } catch (err) {}
   };
 
-  // 📈 Aralıklı Fiyat Hesaplayıcı (Pivot Mantığı)
   const getRangeData = (num) => {
     const step = 10; 
     const diff = (num - 18) * step;
@@ -72,12 +69,11 @@ export default function Home() {
   const playBet = async (type) => {
     if (timeLeft < 10) return toast.warn("⌛ Bahisler kapandı! Yeni turu bekleyin.");
     if (Number(balance) < betAmount) return toast.error("❌ Yetersiz Bakiye!");
-    if (type === 'number' && selectedNumber === null) return toast.warn("⚠️ Lütfen bir fiyat aralığı seçin!");
+    if (type === 'number' && selectedNumber === null) return toast.warn("⚠️ Tahmin için kutucuk seçin!");
 
     setLoading(true);
-    toast.info(`${betAmount} Chip bahis alındı. Canlı fiyat bekleniyor...`, { position: "top-center" });
+    toast.info(`${betAmount} Chip bahis alındı. Sonuç bekleniyor...`);
 
-    // 🚀 Gerçek Fiyat Güdümlü Sonuç
     setTimeout(async () => {
       const res = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd');
       const data = await res.json();
@@ -101,9 +97,9 @@ export default function Home() {
         if (won) {
           const mult = type === 'number' ? 36 : 2;
           setBalance(prev => (Number(prev) + (betAmount * mult)).toString());
-          toast.success(`🎉 TEBRİKLER! Gerçek ETH fiyatı: $${actualPrice}`, { theme: "colored" });
+          toast.success(`🎉 BİLDİNİZ! Gerçek Fiyat: $${actualPrice}`);
         } else {
-          toast.error(`📉 KAYIP: Gerçek ETH fiyatı: $${actualPrice}`, { theme: "dark" });
+          toast.error(`📉 KAYIP! Gerçek Fiyat: $${actualPrice}`);
         }
         setLoading(false);
       }, 3500);
@@ -112,18 +108,16 @@ export default function Home() {
 
   return (
     <main className="flex min-h-screen flex-col items-center bg-[#050505] text-white p-4 font-sans uppercase">
-      {/* 🔔 Bildirim Konteynırı */}
-      <ToastContainer position="top-center" theme="dark" autoClose={4000} />
+      <ToastContainer position="top-center" theme="dark" />
       
-      {/* Üst Bilgi Paneli */}
-      <div className="w-full max-w-5xl flex justify-between items-center mb-8 bg-[#111] p-6 rounded-[2rem] border border-white/5 shadow-2xl">
+      <div className="w-full max-w-6xl flex justify-between items-center mb-8 bg-[#111] p-6 rounded-[2rem] border border-white/5">
         <div>
-          <p className="text-[10px] text-slate-500 font-bold mb-1">LIVE ETH/USD</p>
-          <p className="text-xl font-black text-green-500 tracking-tighter">${ethPrice.toLocaleString()}</p>
+          <p className="text-[10px] text-slate-500 font-bold mb-1">CANLI ETH/USD</p>
+          <p className="text-xl font-black text-green-500">${ethPrice.toLocaleString()}</p>
         </div>
         <div className="text-center">
           <div className={`text-[10px] font-bold px-3 py-1 rounded-full mb-2 ${timeLeft > 10 ? 'bg-green-500/20 text-green-500' : 'bg-red-500/20 text-red-500 animate-pulse'}`}>
-            {timeLeft > 10 ? `TUR BİTİŞİ: ${timeLeft}S` : "BAHİSLER KAPALI"}
+            {timeLeft > 10 ? `KALAN SÜRE: ${timeLeft}S` : "BAHİSLER KAPALI"}
           </div>
           <h1 className="text-3xl font-black italic text-yellow-500">ETHSPIN</h1>
         </div>
@@ -133,11 +127,10 @@ export default function Home() {
         </div>
       </div>
 
-      {/* 🎡 ÇARK */}
-      <div className="relative mb-10 flex flex-col items-center">
-        <div className="w-0 h-0 border-l-[12px] border-r-[12px] border-t-[24px] border-t-yellow-500 z-10 mb-[-12px] border-l-transparent border-r-transparent drop-shadow-xl"></div>
+      <div className="relative mb-8">
+        <div className="absolute top-[-10px] left-1/2 -translate-x-1/2 w-0 h-0 border-l-[12px] border-r-[12px] border-t-[24px] border-t-yellow-500 z-10 border-l-transparent border-r-transparent"></div>
         <div 
-          className="w-36 h-36 rounded-full border-4 border-slate-900 shadow-2xl relative overflow-hidden transition-all duration-[3.5s]"
+          className="w-32 h-32 rounded-full border-4 border-slate-900 shadow-2xl relative overflow-hidden transition-all duration-[3.5s]"
           style={{ 
             transform: `rotate(${rotation}deg)`, 
             transitionTimingFunction: 'cubic-bezier(0.1, 0, 0.1, 1)',
@@ -146,17 +139,15 @@ export default function Home() {
         ></div>
       </div>
 
-      {/* 📋 ARALIKLI TAHMİN TAHTASI */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-9 gap-2 bg-[#111] p-4 rounded-[2.5rem] border border-white/5 mb-8 w-full max-w-6xl shadow-inner">
+      <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-9 gap-2 bg-[#111] p-4 rounded-[2.5rem] border border-white/5 mb-8 w-full max-w-6xl overflow-x-auto">
         {Array.from({length: 37}, (_, i) => i).map(num => {
           const range = getRangeData(num);
-          const isNeutral = num === 18;
           return (
             <button 
               key={num} 
               onClick={() => setSelectedNumber(num)}
               className={`flex flex-col items-center justify-center p-3 rounded-2xl border transition-all duration-300
-                ${isNeutral ? 'bg-yellow-500/10 border-yellow-500' : redNumbers.includes(num) ? 'bg-red-600/10 border-red-500/20' : 'bg-slate-800/40 border-slate-700'}
+                ${num === 18 ? 'bg-yellow-500/10 border-yellow-500 shadow-md' : redNumbers.includes(num) ? 'bg-red-600/10 border-red-500/20' : 'bg-slate-800/40 border-slate-700'}
                 ${selectedNumber === num ? 'ring-2 ring-yellow-500 bg-yellow-500/30 scale-105 z-10' : 'hover:border-white/20'}`}
             >
               <span className="text-[10px] font-black tracking-tighter">${range.start}-{range.end}</span>
@@ -165,27 +156,24 @@ export default function Home() {
         })}
       </div>
 
-      {/* 🎮 İŞLEM PANELİ */}
       <div className="w-full max-w-md bg-[#111] border border-white/5 p-8 rounded-[3rem] shadow-2xl">
-        {/* Bahis Miktarı Seçimi */}
         <div className="flex justify-center gap-3 mb-8">
           {[10, 50, 100, 500].map((amt) => (
             <button
               key={amt}
               onClick={() => setBetAmount(amt)}
-              className={`w-12 h-12 rounded-full border-2 font-black text-[10px] transition-all
-                ${betAmount === amt ? 'bg-yellow-500 text-black border-white shadow-lg' : 'bg-slate-900 text-slate-500 border-slate-800'}`}
+              className={`w-12 h-12 rounded-full border-2 font-black text-xs transition-all
+                ${betAmount === amt ? 'bg-yellow-500 text-black border-white shadow-lg' : 'bg-slate-900 text-slate-400 border-slate-800'}`}
             >
               {amt}
             </button>
           ))}
         </div>
 
-        {/* Kırmızı/Siyah Aksiyon Butonları */}
         <div className="grid grid-cols-3 gap-4">
-          <button disabled={loading || timeLeft < 10} onClick={() => playBet('red')} className="bg-red-600 h-16 rounded-2xl font-black text-xs hover:brightness-110 active:scale-95 disabled:opacity-20 transition-all">KIRMIZI</button>
-          <button disabled={loading || timeLeft < 10} onClick={() => playBet('number')} className="bg-white text-black h-16 rounded-2xl font-black text-xs hover:bg-slate-200 active:scale-95 disabled:opacity-20 transition-all">TAHMİN</button>
-          <button disabled={loading || timeLeft < 10} onClick={() => playBet('black')} className="bg-slate-900 h-16 border border-slate-800 rounded-2xl font-black text-xs hover:bg-black active:scale-95 disabled:opacity-20 transition-all">SİYAH</button>
+          <button disabled={loading || timeLeft < 10} onClick={() => playBet('red')} className="bg-red-600 h-16 rounded-2xl font-black text-xs hover:brightness-110 active:scale-95 disabled:opacity-20 transition-all uppercase">KIRMIZI</button>
+          <button disabled={loading || timeLeft < 10} onClick={() => playBet('number')} className="bg-white text-black h-16 rounded-2xl font-black text-xs hover:bg-slate-200 active:scale-95 disabled:opacity-20 transition-all uppercase">ARALIK</button>
+          <button disabled={loading || timeLeft < 10} onClick={() => playBet('black')} className="bg-slate-900 h-16 border border-slate-800 rounded-2xl font-black text-xs hover:bg-black active:scale-95 disabled:opacity-20 transition-all uppercase">SİYAH</button>
         </div>
       </div>
     </main>
