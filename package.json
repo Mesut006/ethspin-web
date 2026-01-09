@@ -22,5 +22,6 @@
     "eslint": "^9",
     "eslint-config-next": "16.1.1",
     "tailwindcss": "^4"
+    npm install @web3modal/ethers ethers canvas-confetti --save
   }
 }
