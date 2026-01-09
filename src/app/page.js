@@ -1,18 +1,20 @@
 'use client'
 import { useState, useEffect, useCallback } from 'react';
 import { ethers } from 'ethers';
-import { createWeb3Modal, defaultEvmConfig } from '@web3modal/ethers/react';
+import { createAppKit, defaultConfig } from '@reown/appkit/react'
+import { EthersAdapter } from '@reown/appkit-adapter-ethers'
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import confetti from 'canvas-confetti';
 import abi from '../constants/abi.json';
 import { contractAddress } from '../constants';
 
-// 1. WalletConnect Proje Bilgileri (Cloud.walletconnect.com'dan ücretsiz ID alabilirsin)
-const projectId = 'PROJE_ID_BURAYA_GELECEK'; // Buraya kendi projectId'ni yapıştır
+// 1. WalletConnect / Reown Proje ID
+// Not: cloud.walletconnect.com üzerinden aldığın ID'yi buraya yapıştır.
+const projectId = '7629b32c66914619d8544d6507662867'; 
 
 // 2. Base Ana Ağ Konfigürasyonu
-const mainnet = {
+const baseMainnet = {
   chainId: 8453,
   name: 'Base',
   currency: 'ETH',
@@ -22,26 +24,21 @@ const mainnet = {
 
 const metadata = {
   name: 'EthSpin',
-  description: 'Ethereum Price Roulette',
+  description: 'Predict ETH price and win chips on Base network',
   url: 'https://ethspin-web.vercel.app',
   icons: ['https://avatars.githubusercontent.com/u/37784886']
 };
 
-const ethersConfig = defaultEvmConfig({
+// 3. AppKit Kurulumu (Hata veren defaultEvmConfig yerine yeni yapı)
+createAppKit({
+  adapters: [new EthersAdapter()],
+  networks: [baseMainnet],
   metadata,
-  enableEmail: true, 
-  enableSmartAccounts: true,
-  enableAnalytics: true
-});
-
-// Modal oluşturma
-createWeb3Modal({
-  ethersConfig,
-  chains: [mainnet],
   projectId,
-  enableAnalytics: true,
-  themeMode: 'dark'
-});
+  features: {
+    analytics: true
+  }
+})
 
 export default function Home() {
   const [account, setAccount] = useState(null);
@@ -53,8 +50,6 @@ export default function Home() {
   const [activeBets, setActiveBets] = useState({});
   const [isLocked, setIsLocked] = useState(false);
   const [betAmount, setBetAmount] = useState(10);
-
-  const redNumbers = [1, 3, 5, 7, 9, 12, 14, 16, 18, 19, 21, 23, 25, 27, 30, 32, 34, 36];
 
   const fetchLivePrice = useCallback(async () => {
     try {
@@ -90,29 +85,8 @@ export default function Home() {
     return () => clearInterval(timer);
   }, [fetchLivePrice, loading]);
 
-  const getRangeData = (num) => {
-    const step = 10; 
-    const diff = (num - 18) * step;
-    const start = Math.floor(ethPrice + diff);
-    const end = start + 9;
-    return { start, end };
-  };
-
-  const handleBoxClick = (num) => {
-    if (isLocked || timeLeft < 10) return;
-    setActiveBets(prev => {
-      const currentBet = prev[num] || 0;
-      if (currentBet > 0) {
-        const { [num]: _, ...rest } = prev;
-        return rest;
-      }
-      return { ...prev, [num]: betAmount };
-    });
-  };
-
-  const totalBetAmount = Object.values(activeBets).reduce((a, b) => a + b, 0);
-
   const confirmAndPlay = async () => {
+    const totalBetAmount = Object.values(activeBets).reduce((a, b) => a + b, 0);
     if (totalBetAmount === 0) return toast.warn("Lütfen aralık seçin!");
     if (balance < totalBetAmount) return toast.error("Yetersiz bakiye!");
     
@@ -175,35 +149,31 @@ export default function Home() {
         </div>
       </div>
 
-      {/* WalletConnect Butonu (Mobilde de çalışır) */}
+      {/* Modern Cüzdan Bağlama Butonu */}
       <div className="mb-6 scale-90">
-        <w3m-button />
+        <appkit-button />
       </div>
 
-      {/* ÇARK VE TAHTA AYNI KALIYOR... */}
-      {/* (Yer tasarrufu için özet geçiyorum, yukarıdaki tahta kodunu buraya ekleyebilirsin) */}
-      
+      {/* Bahis Kontrolleri */}
       <div className="w-full bg-[#111] border border-white/5 p-6 rounded-[2.5rem] shadow-2xl">
-            <>
-                <div className="flex justify-between items-center mb-4 px-2">
-                    <span className="text-[10px] font-bold text-slate-500 uppercase">MİKTAR:</span>
-                    <div className="flex gap-2">
-                        {[10, 50, 100].map(amt => (
-                            <button key={amt} onClick={() => setBetAmount(amt)}
-                                className={`w-10 h-10 rounded-full border-2 font-black text-[9px] transition-all ${betAmount === amt ? 'bg-yellow-500 text-black border-white' : 'bg-slate-900 text-slate-500 border-slate-800'}`}>
-                                {amt}
-                            </button>
-                        ))}
-                    </div>
-                </div>
-                <button 
-                  disabled={loading || isLocked || totalBetAmount === 0 || timeLeft < 10} 
-                  onClick={confirmAndPlay} 
-                  className={`w-full h-16 rounded-2xl font-black text-sm transition-all ${isLocked ? 'bg-slate-800 text-slate-500' : 'bg-green-600 hover:bg-green-500 text-white shadow-lg'}`}
-                >
-                  {isLocked ? "İŞLENİYOR..." : `ONAYLA (${totalBetAmount.toLocaleString()} ¢)`}
-                </button>
-            </>
+        <div className="flex justify-between items-center mb-4 px-2">
+          <span className="text-[10px] font-bold text-slate-500 uppercase">MİKTAR:</span>
+          <div className="flex gap-2">
+            {[10, 50, 100].map(amt => (
+              <button key={amt} onClick={() => setBetAmount(amt)}
+                className={`w-10 h-10 rounded-full border-2 font-black text-[9px] transition-all ${betAmount === amt ? 'bg-yellow-500 text-black border-white' : 'bg-slate-900 text-slate-500 border-slate-800'}`}>
+                {amt}
+              </button>
+            ))}
+          </div>
+        </div>
+        <button 
+          disabled={loading || isLocked || timeLeft < 10} 
+          onClick={confirmAndPlay} 
+          className={`w-full h-16 rounded-2xl font-black text-sm transition-all ${isLocked ? 'bg-slate-800 text-slate-500' : 'bg-green-600 hover:bg-green-500 text-white shadow-lg'}`}
+        >
+          {isLocked ? "İŞLENİYOR..." : "BAHİSİ ONAYLA"}
+        </button>
       </div>
     </main>
   );
