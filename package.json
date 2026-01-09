@@ -9,7 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@web3modal/ethers": "^1.6.0",
+    "@web3modal/ethers": "latest",
     "canvas-confetti": "^1.9.2",
     "ethers": "^6.11.1",
     "next": "14.1.0",
