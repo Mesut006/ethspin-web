@@ -6,22 +6,15 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "next lint"
   },
   "dependencies": {
-    "@web3modal/ethers": "^5.1.11",
-    "canvas-confetti": "^1.9.4",
-    "ethers": "^6.16.0",
-    "next": "16.1.1",
-    "react": "19.2.3",
-    "react-dom": "19.2.3",
-    "react-toastify": "^11.0.5"
-  },
-  "devDependencies": {
-    "@tailwindcss/postcss": "^4",
-    "eslint": "^9",
-    "eslint-config-next": "16.1.1",
-    "tailwindcss": "^4"
-    npm install @web3modal/ethers ethers canvas-confetti --save
+    "@web3modal/ethers": "^1.6.0",
+    "canvas-confetti": "^1.9.2",
+    "ethers": "^6.11.1",
+    "next": "14.1.0",
+    "react": "^18",
+    "react-dom": "^18",
+    "react-toastify": "^10.0.4"
   }
 }
